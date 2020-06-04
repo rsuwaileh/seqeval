@@ -151,6 +151,38 @@ def f1_score(y_true, y_pred, average='micro', suffix=False):
     return score
 
 
+def f_score(y_true, y_pred, b = 1, average='micro', suffix=False):
+    """Compute the F1 score.
+    The F1 score can be interpreted as a weighted average of the precision and
+    recall, where an F1 score reaches its best value at 1 and worst score at 0.
+    The relative contribution of precision and recall to the F1 score are
+    equal. The formula for the F1 score is::
+        F_b = (1 + b) * (precision * recall) / ((b * precision) + recall)
+    Args:
+        y_true : 2d array. Ground truth (correct) target values.
+        y_pred : 2d array. Estimated targets as returned by a tagger.
+    Returns:
+        score : float.
+    Example:
+        >>> from seqeval.metrics import f1_score
+        >>> y_true = [['O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
+        >>> y_pred = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
+        >>> f1_score(y_true, y_pred)
+        0.50
+    """
+    true_entities = set(get_entities(y_true, suffix))
+    pred_entities = set(get_entities(y_pred, suffix))
+
+    nb_correct = len(true_entities & pred_entities)
+    nb_pred = len(pred_entities)
+    nb_true = len(true_entities)
+
+    p = nb_correct / nb_pred if nb_pred > 0 else 0
+    r = nb_correct / nb_true if nb_true > 0 else 0
+    score = (1 + b) * p * r / ((b * p) + r) if p + r > 0 else 0
+
+    return score
+
 def accuracy_score(y_true, y_pred):
     """Accuracy classification score.
 
